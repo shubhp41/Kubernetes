@@ -11,10 +11,14 @@ app.post('/calculate', async (req, res) => {
     const { file, product } = req.body;
 
     //If file name is not provided
-    if (!file) {
+    if (!file || Array.isArray(file) || file.length == 0) {
         res.status(400).json({ file: null, error: "Invalid JSON input." });
+        return
     }
-
+    if (!product || Array.isArray(product) || product.length == 0) {
+        res.status(400).json({ file: null, error: "Invalid JSON input." });
+        return
+    }
     //check if file exists
     try {
         const response = await axios.get(`http://container2:7000/file/${file}`);
