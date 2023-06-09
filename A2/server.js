@@ -5,9 +5,9 @@ require('dotenv').config(); // Load the environment variables from .env file
 
 // Set AWS credentials
 AWS.config.update({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    sessionToken: process.env.AWS_Session
+    accessKeyId: 'ASIA3N3IDT54FPGTOYV7',
+    secretAccessKey: 'bPl49b6Ob+C3tpfLAo3aXU1OJ2P70f6rUnyVdcNU',
+    sessionToken: 'FwoGZXIvYXdzEEsaDPTOJKhafPlmPqp64CLAAYWsJvUcUbg+7ZJuQLudRlMePH6SQbbFdvYnmPg2BQfMz84j0DxTsSw8Mk8Q3SFX6rhR+gnqt/zWwnNKLQHGtlW/OVw2xv6/KC3kQfxD7/665m3ClEmiufyeUV/4wZngjGArALwmYQZ+XA7KuP6E8Kw7UEqqeBfqTiPmjTeWoo2sal69tw+/WL68zu+9jRE6piS5vxcAZ6KzcmkZCPIDVUOqRcDIlm/r7ReNVTFO9avguO7vc7Xz8oBjRyXXoSPkZCi3h4qkBjIt+6X+7qWLmXBI/5kMC+pxjPus27GUn2fmmkRnIkX0XxOBI2bGTPmBIjjCyqLu'
 });
 
 //This code is been refered from an online youtube video link:https://www.youtube.com/watch?v=Yw4rkaTc0f8
