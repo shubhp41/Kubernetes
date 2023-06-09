@@ -1,6 +1,14 @@
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
 const AWS = require('aws-sdk');
+require('dotenv').config(); // Load the environment variables from .env file
+
+// Set AWS credentials
+AWS.config.update({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    sessionToken: process.env.AWS_Session
+});
 
 //This code is been refered from an online youtube video link:https://www.youtube.com/watch?v=Yw4rkaTc0f8
 // Load the protobuf file
@@ -105,101 +113,4 @@ server.addService(computeAndStorage.EC2Operations.service, {
 server.start();
 console.log('gRPC server started on port 50051');
 
-
-
-
-// TESTING CODE
-// const grpc = require('grpc');
-// const protoLoader = require('@grpc/proto-loader');
-// const fs = require('fs');
-// const path = require('path');
-
-// // Load the protobuf definition
-// const protoFile = 'computeandstorage.proto';
-// const protoDefinition = protoLoader.loadSync(protoFile);
-// const { computeandstorage } = grpc.loadPackageDefinition(protoDefinition);
-
-// // Directory to store the files
-// const storageDirectory = path.join(__dirname, 'storage');
-
-// // Create the storage directory if it doesn't exist
-// if (!fs.existsSync(storageDirectory)) {
-//     fs.mkdirSync(storageDirectory);
-// }
-
-// // gRPC service implementation
-// const server = new grpc.Server();
-// server.addService(computeandstorage.EC2Operations.service, {
-//     storeData: (call, callback) => {
-//         const { data } = call.request;
-
-//         // Generate a unique file name
-//         const fileName = `file.txt`;
-
-//         // Save the file locally
-//         const filePath = path.join(storageDirectory, fileName);
-//         fs.writeFile(filePath, data, (error) => {
-//             if (error) {
-//                 console.error('Error storing file:', error);
-//                 callback(error);
-//             } else {
-//                 console.log('File stored locally:', filePath);
-//                 const response = {
-//                     s3uri: filePath,
-//                 };
-//                 callback(null, response);
-//             }
-//         });
-//     },
-
-//     appendData: (call, callback) => {
-//         const { data } = call.request;
-//         const s3uriArray = call.metadata.get('s3uri');
-//         const s3uri = s3uriArray[0];
-
-//         // Read the existing file
-//         fs.readFile(s3uri, 'utf8', (error, existingData) => {
-//             console.log("EXISTING DATA", existingData);
-//             console.log("error", error)
-//             if (error) {
-//                 console.error('Error reading file:', error);
-//                 callback(error);
-//             } else {
-//                 const updatedData = existingData + data;
-//                 console.log("UPDATED DATA", updatedData)
-
-//                 // Update the file
-//                 fs.writeFile(s3uri, updatedData, (error) => {
-//                     if (error) {
-//                         console.error('Error appending data:', error);
-//                         callback(error);
-//                     } else {
-//                         console.log('Data appended to file:', s3uri);
-//                         callback(null, {});
-//                     }
-//                 });
-//             }
-//         });
-//     },
-
-//     deleteFile: (call, callback) => {
-//         const s3uri = call.request.s3uri;
-
-//         // Delete the file
-//         fs.unlink(s3uri, (error) => {
-//             if (error) {
-//                 console.error('Error deleting file:', error);
-//                 callback(error);
-//             } else {
-//                 console.log('File deleted:', s3uri);
-//                 callback(null, {});
-//             }
-//         });
-//     },
-// });
-
-// // Start the gRPC server
-// server.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
-// server.start();
-// console.log('gRPC server started on port 50051');
 
