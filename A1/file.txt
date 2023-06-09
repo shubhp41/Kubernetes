@@ -1,5 +1,5 @@
 product,amount
 wheat,10
 wheat,20
-oats,5
+oats,4
 barley,6

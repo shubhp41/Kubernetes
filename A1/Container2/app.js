@@ -10,6 +10,7 @@ app.use(bodyParser.json());
 // GET /file/:filename
 app.get('/file/:filename', (req, res) => {
     const { filename } = req.params;
+    
     const filepath = `/usr/files/${filename}`;
 
     // Check if file exists
