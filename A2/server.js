@@ -75,7 +75,7 @@ server.addService(computeAndStorage.EC2Operations.service, {
                 const existingContent = data.Body.toString();
                 console.log("This is existing body", existingContent)
                 // Append the new data to the existing content
-                const updatedContent = existingContent + " " + newdata;
+                const updatedContent = existingContent + newdata;
                 console.log("This is updated content", updatedContent)
 
                 // Upload the updated content back to S3
