@@ -1,0 +1,43 @@
+steps:
+  # Authenticate Docker to Google Cloud
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - 'gcloud auth configure-docker --quiet'
+  # Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/kubernatives-388300/container1/image1'
+      - '.'
+  # Push Docker image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/kubernatives-388300/container1/image1'
+   # Step 1: Deploy Container 1
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - apply
+      - -f
+      - container1-deployment.yaml
+
+  # Step 2: Create Service for Container 1
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - apply
+      - -f
+      - container1-service.yaml
+  # Step 3: Apply Persistent Volume Claim
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - apply
+      - -f
+      - persistent-volume-claim.yaml
+
+images:
+  - 'us-central1-docker.pkg.dev/kubernatives-388300/container1/image1'
+
+
