@@ -1,0 +1,154 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: uploadimage001
+      AccessControl: BucketOwnerFullControl
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+    DeletionPolicy: Retain
+
+  ScheduledRule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: Remainderr
+      Description: EventBridge rule to trigger every day at 8:00 PM (UTC)
+      ScheduleExpression: "cron(0 20 * * ? *)" # This schedule expression represents 0 minutes past 8 PM UTC daily
+      State: "ENABLED"
+
+  MyLambdaFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: testing1
+      Handler: index.handler
+      Runtime: nodejs14.x
+      Role: arn:aws:iam::975080007958:role/LabRole
+      Code:
+        S3Bucket: remainderemail
+        S3Key: code.zip
+
+  MySNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: MySNSTopic
+      Subscription:
+        - Endpoint: patelshubh077@gmail
+          Protocol: email
+
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+
+  MyInternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  MyVPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref MyVPC
+      InternetGatewayId: !Ref MyInternetGateway
+
+  MyPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+
+  MyPrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+
+  MyRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MyVPC
+
+  MyPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: MyVPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref MyRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyInternetGateway
+
+  MyPublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MyPublicSubnet
+      RouteTableId: !Ref MyRouteTable
+
+  MyDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Todos
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: N
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-06ca3ca175f37dd66 # Specify the appropriate AMI ID
+      InstanceType: t2.micro
+      SubnetId: !Ref MyPrivateSubnet # Use private subnet for EC2 instance
+      SecurityGroupIds:
+        - !Ref MySecurityGroup
+      IamInstanceProfile: !Ref MyInstanceProfile
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH and HTTP traffic
+      VpcId: !Ref MyVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+
+  MyInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - LabRole
+
+  MyVPCEndpointDynamoDB:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref MyVPC
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.dynamodb"
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref MySecurityGroup
+      SubnetIds:
+        - !Ref MyPrivateSubnet
+
+Outputs:
+  DynamoDBTableArn:
+    Value: !Ref MyDynamoDBTable
+    Description: ARN of the DynamoDB table
+  DynamoDBTableURL:
+    Value: !Sub "https://console.aws.amazon.com/dynamodb/home?region=${AWS::Region}#tables:selected=${MyDynamoDBTable}"
+    Description: URL to access the DynamoDB table in the AWS Management Console
