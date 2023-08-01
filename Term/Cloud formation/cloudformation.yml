@@ -99,14 +99,31 @@ Resources:
         WriteCapacityUnits: 5
 
   MyEC2Instance:
-    Type: AWS::EC2::Instance
-    Properties:
-      ImageId: ami-06ca3ca175f37dd66 # Specify the appropriate AMI ID
-      InstanceType: t2.micro
-      SubnetId: !Ref MyPrivateSubnet # Use private subnet for EC2 instance
-      SecurityGroupIds:
-        - !Ref MySecurityGroup
-      IamInstanceProfile: !Ref MyInstanceProfile
+  Type: AWS::EC2::Instance
+  Properties:
+    ImageId: ami-06ca3ca175f37dd66 # Specify the appropriate AMI ID
+    InstanceType: t2.micro
+    SubnetId: !Ref MyPrivateSubnet # Use private subnet for EC2 instance
+    SecurityGroupIds:
+      - !Ref MySecurityGroup
+    IamInstanceProfile: !Ref MyInstanceProfile
+    UserData:
+      Fn::Base64: !Sub |
+        #!/bin/bash
+        # Clone your Git repository
+        git clone https://git.cs.dal.ca/pareshbhai/csci4145-5409_term_project_b00927948_shubh_patel.git /home/ec2-user/app
+
+        # Install Node.js and npm (replace with your preferred method)
+        curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
+        sudo yum install -y nodejs
+
+        # Install app dependencies
+        cd /home/ec2-user/app
+        npm install
+
+        # Start your Node.js app
+        node index.js
+
 
   MySecurityGroup:
     Type: AWS::EC2::SecurityGroup
